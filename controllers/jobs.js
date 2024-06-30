@@ -1,5 +1,3 @@
-const express = require("express");
-
 const getAlljobController = async (request, response) => {
   return response.send("get All jobs");
 };
