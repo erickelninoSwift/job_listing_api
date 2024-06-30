@@ -4,6 +4,7 @@ const express = require("express");
 const app = express();
 const JobsRouter = require("./routes/jobs");
 const Authroutes = require("./routes/auth");
+const { connectDB } = require("./db/connect");
 // error handler
 const notFoundMiddleware = require("./middleware/not-found");
 const errorHandlerMiddleware = require("./middleware/error-handler");
@@ -13,13 +14,10 @@ app.use(express.json());
 
 // routes
 app.get("/", (req, res) => {
-  res.send("jobs api");
+  return res.status(200).json({
+    message: "Hello world",
+  });
 });
-
-app.use(notFoundMiddleware);
-app.use(errorHandlerMiddleware);
-
-const port = process.env.PORT || 3000;
 
 // Jobes and Auth middleware
 app.use("/api/v1/auth", Authroutes);
@@ -27,8 +25,14 @@ app.use("/api/v1/jobs", JobsRouter);
 
 // =============================
 
+app.use(notFoundMiddleware);
+app.use(errorHandlerMiddleware);
+
+const port = process.env.PORT || 3000;
+
 const start = async () => {
   try {
+    await connectDB();
     app.listen(port, () =>
       console.log(`Server is listening on port ${port}...`)
     );

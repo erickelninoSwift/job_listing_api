@@ -1,5 +1,3 @@
-const express = require("express");
-
 const registerUserController = async (request, response) => {
   return response.send("Register User");
 };
