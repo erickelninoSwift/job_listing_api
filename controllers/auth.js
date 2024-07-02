@@ -1,7 +1,6 @@
 const userModel = require("../models/User");
 const { StatusCodes } = require("http-status-codes");
-const { BadRequestError } = require("../errors/index");
-const jwt = require("jsonwebtoken");
+const { BadRequestErrorn, UnauthenticatedError } = require("../errors/index");
 
 const registerUserController = async (request, response) => {
   const { name, email, password } = request.body;
@@ -24,21 +23,13 @@ const registerUserController = async (request, response) => {
     const user = new userModel({ ...tempUser });
 
     const savedUser = await user.save();
-    const token = jwt.sign(
-      {
-        userID: savedUser._id,
-        name: savedUser.name,
-        email: savedUser.email,
-      },
-      "JAckpotHereJWT",
-      { expiresIn: "30d" }
-    );
+
     if (!savedUser) {
       return response.status(StatusCodes.EXPECTATION_FAILED).json({
         message: "There was an error while trying to save datat",
       });
     }
-
+    const token = savedUser.createJWT();
     return response.status(StatusCodes.CREATED).json({
       user: { name: savedUser.name },
       token,
@@ -47,7 +38,31 @@ const registerUserController = async (request, response) => {
 };
 
 const loginUserController = async (request, response) => {
-  return response.send("Loggin User");
+  const { email, password } = request.body;
+  if (!email || !password) {
+    throw new BadRequestError("Please provide email and password");
+  }
+
+  const user = await userModel.findOne({ email: email });
+  if (!user) {
+    throw new UnauthenticatedError("Invalid Credentials");
+  }
+
+  // comapre the password here
+
+  const isMatch = user.comparePassword(password);
+  if (!isMatch) {
+    return response.status(StatusCodes.UNAUTHORIZED).json({
+      message: "server ",
+    });
+  }
+  // =======
+
+  const token = user.createJWT();
+  return response.status(StatusCodes.OK).json({
+    user: { name: user.name },
+    token,
+  });
 };
 
 module.exports = { registerUserController, loginUserController };
