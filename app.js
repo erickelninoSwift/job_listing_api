@@ -5,6 +5,7 @@ const app = express();
 const JobsRouter = require("./routes/jobs");
 const Authroutes = require("./routes/auth");
 const { connectDB } = require("./db/connect");
+const { authMiddleWare } = require("./middleware/authentication");
 // error handler
 const notFoundMiddleware = require("./middleware/not-found");
 const errorHandlerMiddleware = require("./middleware/error-handler");
@@ -21,7 +22,7 @@ app.get("/", (req, res) => {
 
 // Jobes and Auth middleware
 app.use("/api/v1/auth", Authroutes);
-app.use("/api/v1/jobs", JobsRouter);
+app.use("/api/v1/jobs", authMiddleWare, JobsRouter);
 
 // =============================
 

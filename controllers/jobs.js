@@ -1,5 +1,7 @@
 const getAlljobController = async (request, response) => {
-  return response.send("get All jobs");
+  return response.json({
+    user: request.user,
+  });
 };
 
 const getJobController = async (request, response) => {

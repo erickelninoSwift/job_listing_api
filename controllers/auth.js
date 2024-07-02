@@ -50,11 +50,9 @@ const loginUserController = async (request, response) => {
 
   // comapre the password here
 
-  const isMatch = user.comparePassword(password);
+  const isMatch = await user.comparePassword(password);
   if (!isMatch) {
-    return response.status(StatusCodes.UNAUTHORIZED).json({
-      message: "server ",
-    });
+    throw new UnauthenticatedError("Invalid Credentials");
   }
   // =======
 
