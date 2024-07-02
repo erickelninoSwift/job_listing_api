@@ -1,3 +1,6 @@
+const jobsModel = require("../models/Job");
+const { StatusCodes } = require("http-status-codes");
+const { UnauthenticatedError, NotFoundError } = require("../errors/index");
 const getAlljobController = async (request, response) => {
   return response.json({
     user: request.user,
@@ -9,7 +12,13 @@ const getJobController = async (request, response) => {
 };
 
 const addJobController = async (request, response) => {
-  return response.send("add one job");
+  request.body.createdby = request.user.userID;
+  try {
+    const job = new jobsModel(request.body);
+    await job.save();
+
+    return response.status(StatusCodes.CREATED).json({ job });
+  } catch (error) {}
 };
 
 const deleteJobController = async (request, response) => {
