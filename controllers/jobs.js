@@ -2,9 +2,27 @@ const jobsModel = require("../models/Job");
 const { StatusCodes } = require("http-status-codes");
 const { UnauthenticatedError, NotFoundError } = require("../errors/index");
 const getAlljobController = async (request, response) => {
-  return response.json({
-    user: request.user,
-  });
+  try {
+    const alljobs = await jobsModel
+      .find(
+        { createdby: request.user.userID },
+        { createdAt: 0, updatedAt: 0, __v: 0 }
+      )
+      .sort("createdAt");
+    if (!alljobs) {
+      return response.status(StatusCodes.OK).json({
+        message: "No Jobs found",
+      });
+    }
+    return response.status(StatusCodes.OK).json({
+      alljobs,
+      total: alljobs.length,
+    });
+  } catch (error) {
+    return response.status(StatusCodes.BAD_REQUEST).json({
+      error,
+    });
+  }
 };
 
 const getJobController = async (request, response) => {

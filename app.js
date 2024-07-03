@@ -9,10 +9,11 @@ const { authMiddleWare } = require("./middleware/authentication");
 // error handler
 const notFoundMiddleware = require("./middleware/not-found");
 const errorHandlerMiddleware = require("./middleware/error-handler");
-
+const cookieParser = require("cookie-parser");
 app.use(express.json());
 // extra packages
 
+app.use(cookieParser());
 // routes
 app.get("/", (req, res) => {
   return res.status(200).json({

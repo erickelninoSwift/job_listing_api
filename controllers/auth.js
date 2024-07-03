@@ -30,6 +30,7 @@ const registerUserController = async (request, response) => {
       });
     }
     const token = savedUser.createJWT();
+    response.cookie("token", token);
     return response.status(StatusCodes.CREATED).json({
       user: { name: savedUser.name },
       token,
@@ -57,6 +58,7 @@ const loginUserController = async (request, response) => {
   // =======
 
   const token = user.createJWT();
+  response.cookie("token", token);
   return response.status(StatusCodes.OK).json({
     user: { name: user.name },
     token,

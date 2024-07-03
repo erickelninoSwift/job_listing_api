@@ -4,13 +4,13 @@ const jwt = require("jsonwebtoken");
 const { UnauthenticatedError } = require("../errors/index");
 
 const authMiddleWare = async (request, response, next) => {
-  const AuthHeader = request.headers.authorization;
+  const AuthHeader = request.cookies.token;
 
-  if (!AuthHeader || !AuthHeader.startsWith("Bearer ")) {
+  if (!AuthHeader) {
     throw new UnauthenticatedError("Please make sure you logged in");
   }
-
-  const token = AuthHeader.split(" ")[1];
+  // const token = AuthHeader.split(" ")[1];
+  const token = request.cookies.token;
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
 
