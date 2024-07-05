@@ -1,10 +1,6 @@
 const jobsModel = require("../models/Job");
 const { StatusCodes } = require("http-status-codes");
-const {
-  UnauthenticatedError,
-  NotFoundError,
-  BadRequestError,
-} = require("../errors/index");
+const { NotFoundError, BadRequestError } = require("../errors/index");
 const getAlljobController = async (request, response) => {
   try {
     const alljobs = await jobsModel
@@ -55,7 +51,11 @@ const addJobController = async (request, response) => {
     await job.save();
 
     return response.status(StatusCodes.CREATED).json({ job });
-  } catch (error) {}
+  } catch (error) {
+    return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      ...error.message,
+    });
+  }
 };
 
 const deleteJobController = async (request, response) => {
@@ -69,7 +69,6 @@ const deleteJobController = async (request, response) => {
     if (!job) {
       throw new BadRequestError("Job you trying to delete doesnt exist");
     }
-
     await job.save();
 
     return response.status(StatusCodes.OK).json({

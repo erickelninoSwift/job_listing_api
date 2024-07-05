@@ -4,38 +4,19 @@ const { BadRequestErrorn, UnauthenticatedError } = require("../errors/index");
 
 const registerUserController = async (request, response) => {
   const { name, email, password } = request.body;
-  try {
-    if (!name || !email || !password) {
-      throw new BadRequestError("Please make sure you provide all fields ");
-    }
-
-    const findUser = await userModel.findOne({ email: email });
-    if (findUser) {
-      return response.status(StatusCodes.FORBIDDEN).json({
-        message: "the current email already exist in our db",
-      });
-    }
-    const tempUser = {
-      name,
-      email,
-      password,
-    };
-    const user = new userModel({ ...tempUser });
-
-    const savedUser = await user.save();
-
-    if (!savedUser) {
-      return response.status(StatusCodes.EXPECTATION_FAILED).json({
-        message: "There was an error while trying to save datat",
-      });
-    }
-    const token = savedUser.createJWT();
-    response.cookie("token", token);
-    return response.status(StatusCodes.CREATED).json({
-      user: { name: savedUser.name },
-      token,
-    });
-  } catch (error) {}
+  const tempUser = {
+    name,
+    email,
+    password,
+  };
+  const user = new userModel({ ...tempUser });
+  const savedUser = await user.save();
+  const token = savedUser.createJWT();
+  response.cookie("token", token);
+  return response.status(StatusCodes.CREATED).json({
+    user: { name: savedUser.name },
+    token,
+  });
 };
 
 const loginUserController = async (request, response) => {
