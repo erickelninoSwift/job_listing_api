@@ -1,6 +1,10 @@
 const jobsModel = require("../models/Job");
 const { StatusCodes } = require("http-status-codes");
-const { UnauthenticatedError, NotFoundError } = require("../errors/index");
+const {
+  UnauthenticatedError,
+  NotFoundError,
+  BadRequestError,
+} = require("../errors/index");
 const getAlljobController = async (request, response) => {
   try {
     const alljobs = await jobsModel
@@ -10,7 +14,7 @@ const getAlljobController = async (request, response) => {
       )
       .sort("createdAt");
     if (!alljobs) {
-      return response.status(StatusCodes.OK).json({
+      return response.status(StatusCodes.NOT_FOUND).json({
         message: "No Jobs found",
       });
     }
@@ -26,7 +30,22 @@ const getAlljobController = async (request, response) => {
 };
 
 const getJobController = async (request, response) => {
-  return response.send("get a signle job ");
+  const { userID } = request.user;
+  const { id } = request.params;
+
+  try {
+    const findJob = await jobsModel.findOne({ _id: id, createdby: userID });
+    if (!findJob) {
+      throw new NotFoundError(`Jobs was not found with this id :${id}`);
+    }
+    return response.status(StatusCodes.OK).json({
+      findJob,
+    });
+  } catch (error) {
+    return response.status(StatusCodes.BAD_GATEWAY).json({
+      error,
+    });
+  }
 };
 
 const addJobController = async (request, response) => {
@@ -40,11 +59,65 @@ const addJobController = async (request, response) => {
 };
 
 const deleteJobController = async (request, response) => {
-  return response.send("delete a job");
+  const { userID } = request.user;
+  const { id } = request.params;
+  try {
+    const job = await jobsModel.findOneAndDelete({
+      _id: id,
+      createdby: userID,
+    });
+    if (!job) {
+      throw new BadRequestError("Job you trying to delete doesnt exist");
+    }
+
+    await job.save();
+
+    return response.status(StatusCodes.OK).json({
+      status: "Success",
+      deleted: job,
+    });
+  } catch (error) {
+    throw new Error(error.message);
+  }
 };
 
 const updateJobController = async (request, response) => {
-  return response.send("update jobs");
+  const { userID } = request.user;
+  const { id } = request.params;
+  const { company, position } = request.body;
+
+  if (!userID || !id) {
+    throw new BadRequestError(
+      "Please make sure you have logged in our selected the right jobs"
+    );
+  }
+
+  if (!company || !position || company === "" || position === "") {
+    return response.status(StatusCodes.BAD_REQUEST).json({
+      message: "Please make sure that company /position is filled",
+    });
+  }
+
+  try {
+    const jobs = await jobsModel.findOne({ _id: id, createdby: userID });
+    if (!jobs) {
+      return response.status(StatusCodes.NOT_FOUND).json({
+        message: "Job not found",
+      });
+    }
+    jobs.company = company;
+    jobs.position = position;
+
+    await jobs.save();
+
+    return response.status(StatusCodes.OK).json({
+      jobs,
+    });
+  } catch (error) {
+    return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      error,
+    });
+  }
 };
 
 module.exports = {
