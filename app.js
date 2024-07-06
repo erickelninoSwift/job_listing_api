@@ -10,6 +10,7 @@ const { authMiddleWare } = require("./middleware/authentication");
 const notFoundMiddleware = require("./middleware/not-found");
 const errorHandlerMiddleware = require("./middleware/error-handler");
 const cookieParser = require("cookie-parser");
+const allUsers = require("./routes/userRoutes");
 
 // security package
 // ===============
@@ -46,6 +47,7 @@ app.get("/", (req, res) => {
 // Jobes and Auth middleware
 app.use("/api/v1/auth", Authroutes);
 app.use("/api/v1/jobs", authMiddleWare, JobsRouter);
+app.use("/api/v1/users", authMiddleWare, allUsers);
 
 // =============================
 
