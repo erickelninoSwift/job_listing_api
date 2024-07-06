@@ -10,7 +10,29 @@ const { authMiddleWare } = require("./middleware/authentication");
 const notFoundMiddleware = require("./middleware/not-found");
 const errorHandlerMiddleware = require("./middleware/error-handler");
 const cookieParser = require("cookie-parser");
+
+// security package
+// ===============
+const rateLimit = require("express-rate-limit");
+const helmet = require("helmet");
+const cors = require("cors");
+const xss = require("xss-clean");
+
+// ================
+app.use(
+  rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
+    standardHeaders: "draft-7", // draft-6: `RateLimit-*` headers; draft-7: combined `RateLimit` header
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
+    // store: ... , // Redis, Memcached, etc. See below.
+  })
+);
 app.use(express.json());
+app.use(helmet());
+app.use(xss());
+app.use(cors());
+
 // extra packages
 
 app.use(cookieParser());
