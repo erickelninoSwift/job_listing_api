@@ -3,7 +3,7 @@ const { StatusCodes } = require("http-status-codes");
 
 const getAllusers = async (request, response) => {
   try {
-    const findAlluser = await userModel.find({ password: 0 });
+    const findAlluser = await userModel.find({});
     if (!findAlluser) {
       return response.status(StatusCodes.NOT_FOUND);
     }
