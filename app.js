@@ -39,9 +39,7 @@ app.use(cors());
 app.use(cookieParser());
 // routes
 app.get("/", (req, res) => {
-  return res.status(200).json({
-    message: "Hello world",
-  });
+  return res.send("<h1>Welcome to Jobs APIs </h1>");
 });
 
 // Jobes and Auth middleware
